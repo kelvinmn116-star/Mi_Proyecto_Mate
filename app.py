@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-import matplotlib.subplots as plt
+import matplotlib.pyplot as plt
 import google.generativeai as genai
 from google.api_core.client_options import ClientOptions
 
@@ -8,10 +8,9 @@ st.set_page_config(page_title="MathModel AI", layout="centered")
 
 # 🔐 Conexión segura con la clave guardada en los Secrets de Streamlit
 try:
-    # El código busca la clave oculta de forma automática en los servidores de Streamlit
     API_KEY = st.secrets["GEMINI_API_KEY"]
     
-    # Configuración obligatoria para las nuevas llaves 'AQ.' de Google
+    # Configuración obligatoria para las llaves 'AQ.' de Google
     options = ClientOptions(api_endpoint="generativelanguage.googleapis.com")
     genai.configure(api_key=API_KEY, client_options=options)
 except Exception:
@@ -32,7 +31,7 @@ if st.button("Resolver con IA y Graficar"):
     if pregunta_usuario:
         with st.spinner("La Inteligencia Artificial está analizando y resolviendo el problema paso a paso..."):
             try:
-                # Modelo de última generación capaz de procesar cualquier ejercicio matemático
+                # Modelo de última generación
                 model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt = f"""
@@ -72,7 +71,6 @@ if st.button("Resolver con IA y Graficar"):
                     ax.fill_between(t, 0, y, color="#4EA8DE", alpha=0.4)
                     ax.set_ylabel("Profundidad (m)")
                 elif "dy/dx" in texto or "p(x)" in texto or "edo" in texto:
-                    # Generar una familia de curvas para simular la constante C de la ecuación diferencial
                     for c in [-5, 0, 5, 10]:
                         y = (1 / t) * (3 + c)
                         ax.plot(t, y, label=f"C = {c}" if c==0 else "")

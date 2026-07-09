@@ -1,124 +1,94 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-import re
+import matplotlib.subplots as plt
+import google.generativeai as genai
+from google.api_core.client_options import ClientOptions
 
 st.set_page_config(page_title="MathModel AI", layout="centered")
 
-st.title("Asistente de Modelado Matemático")
-st.write("Proyecto de Emprendimiento - Enfoque en Inteligencia Artificial")
+# 🔐 Conexión segura con la clave guardada en los Secrets de Streamlit
+try:
+    # El código busca la clave oculta de forma automática en los servidores de Streamlit
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+    
+    # Configuración obligatoria para las nuevas llaves 'AQ.' de Google
+    options = ClientOptions(api_endpoint="generativelanguage.googleapis.com")
+    genai.configure(api_key=API_KEY, client_options=options)
+except Exception:
+    st.error("Falta configurar la clave GEMINI_API_KEY en los Secrets de Streamlit Cloud.")
+
+st.title("Asistente de Modelado Matemático Universal")
+st.write("Proyecto de Emprendimiento - Inteligencia Artificial Real")
 
 st.markdown("---")
 
-st.subheader("Análisis de Problemas Aplicados")
+st.subheader("Análisis de Problemas en Tiempo Real")
 pregunta_usuario = st.text_input(
-    "Introduzca cualquier problema matemático o caso industrial:",
-    placeholder="Ej: dy/dx + P(x)y = Q(x)..."
+    "Introduzca cualquier problema matemático, ecuación o caso industrial:",
+    placeholder="Ej: dy/dx + P(x)y = Q(x), integrales, canales trapezoidales..."
 )
 
-if st.button("Resolver y Graficar"):
+if st.button("Resolver con IA y Graficar"):
     if pregunta_usuario:
-        texto = pregunta_usuario.lower()
-        
-        with st.spinner("Procesando variables algebraicas y ejecutando motor numérico..."):
-            
-            # --- MOTOR 1: ECUACIONES DIFERENCIALES LINEALES DE PRIMER ORDEN (Tu fórmula) ---
-            if "dy/dx" in texto or "p(x)" in texto or "ecuacion diferencial" in texto:
-                st.subheader("Resolución Analítica en Tiempo Real")
-                st.write("### 1. Identificación del Modelo Matemático:")
-                st.write("Se ha detectado una **Ecuación Diferencial Ordinaria (EDO) Lineal de Primer Orden** en su forma estándar:")
-                st.latex(r"\frac{dy}{dx} + P(x)y = Q(x)")
+        with st.spinner("La Inteligencia Artificial está analizando y resolviendo el problema paso a paso..."):
+            try:
+                # Modelo de última generación capaz de procesar cualquier ejercicio matemático
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
-                st.write("### 2. Planteamiento del Método de Solución:")
-                st.write("Para resolver este sistema, utilizamos el método del **Factor Integrante**, denotado matemáticamente como $\mu(x)$:")
-                st.latex(r"\mu(x) = e^{\int P(x) \, dx}")
+                prompt = f"""
+                Eres un profesor experto en matemáticas avanzadas, cálculo e ingeniería.
+                Resuelve el problema matemático que te dará el usuario de forma completamente real, analítica y exacta.
                 
-                st.write("### 3. Desarrollo Analítico Paso a Paso:")
-                st.write("**Paso A:** Multiplicamos toda la ecuación diferencial por el factor integrante hallado:")
-                st.latex(r"e^{\int P(x)dx} \frac{dy}{dx} + P(x)e^{\int P(x)dx}y = Q(x)e^{\int P(x)dx}")
+                Muestra el procedimiento matemático completo paso a paso de forma detallada.
+                Usa el formato LaTeX ($formula$ o $$formula$$) para que todas las ecuaciones, fracciones, derivadas e integrales se vean perfectas en la pantalla.
                 
-                st.write("**Paso B:** Aplicamos la regla del producto de derivadas en el miembro izquierdo de la igualdad:")
-                st.latex(r"\frac{d}{dx} \left[ y \cdot e^{\int P(x)dx} \right] = Q(x)e^{\int P(x)dx}")
+                Estructura tu respuesta ordenadamente:
+                1. Análisis e identificación del problema.
+                2. Fórmulas, métodos o teoremas a aplicar.
+                3. Desarrollo matemático paso a paso (con sustituciones y cálculos reales).
+                4. Resultado final destacado.
                 
-                st.write("**Paso C:** Integramos ambos lados de la ecuación respecto a la variable independiente $x$:")
-                st.latex(r"y \cdot e^{\int P(x)dx} = \int \left( Q(x)e^{\int P(x)dx} \right) \, dx + C")
+                Problema a resolver: {pregunta_usuario}
+                """
                 
-                st.write("### 4. Solución General Explícita:")
-                st.write("Despejando la variable dependiente $y$, obtenemos el resultado analítico destacado:")
-                st.success("La solución general del sistema está dada por:")
-                st.latex(r"y(x) = e^{-\int P(x) \, dx} \left[ \int Q(x)e^{\int P(x) \, dx} \, dx + C \right]")
+                respuesta = model.generate_content(prompt)
                 
-                # Gráfica Dinámica de la Familia de Soluciones (Campos de dirección simulados)
-                x_vals = np.linspace(0.1, 5, 100)
+                # Mostrar el resultado real generado en vivo por la IA
+                st.subheader("Resolución Analítica Paso a Paso")
+                st.write(respuesta.text)
+                
+                st.markdown("---")
+                
+                # Generador de gráficos dinámicos adaptativos según el tema
+                st.subheader("Comportamiento Gráfico del Modelo")
+                t = np.linspace(0.1, 10, 100)
+                texto = pregunta_usuario.lower()
+                
                 fig, ax = plt.subplots(figsize=(8, 3.5))
-                # Graficar varias curvas para diferentes valores de la constante C
-                for c in [-10, 0, 10, 20]:
-                    y_vals = (1 / x_vals) * (5 + c)  # Simulación de curvas solución reales
-                    ax.plot(x_vals, y_vals, label=f"C = {c}" if c==0 else "")
                 
-                ax.set_ylim(-20, 40)
-                ax.set_xlabel("Variable Independiente (x)")
-                ax.set_ylabel("Variable Dependiente (y)")
-                ax.set_title("Familia de Curvas Solución del Sistema Diferencial")
+                if "canal" in texto or "trapezoidal" in texto:
+                    y = np.ones(100) * 1.5
+                    ax.plot(t, y, color="#023E8A", linewidth=2.5, label="Tirante de agua (m)")
+                    ax.fill_between(t, 0, y, color="#4EA8DE", alpha=0.4)
+                    ax.set_ylabel("Profundidad (m)")
+                elif "dy/dx" in texto or "p(x)" in texto or "edo" in texto:
+                    # Generar una familia de curvas para simular la constante C de la ecuación diferencial
+                    for c in [-5, 0, 5, 10]:
+                        y = (1 / t) * (3 + c)
+                        ax.plot(t, y, label=f"C = {c}" if c==0 else "")
+                    ax.set_ylim(-10, 20)
+                    ax.set_ylabel("Variable Dependiente (y)")
+                else:
+                    y = t ** 2
+                    ax.plot(t, y, color="#2A9D8F", linewidth=2.5, label="Evolución estándar")
+                    ax.set_ylabel("Magnitud (Y)")
+                    
+                ax.set_xlabel("Variable X / Tiempo")
                 ax.grid(True, linestyle=":", alpha=0.6)
-                st.pyplot(fig)
-
-            # --- MOTOR 2: CANAL TRAPEZOIDAL ---
-            elif "canal" in texto or "trapezoidal" in texto:
-                st.subheader("Resolución Analítica en Tiempo Real")
-                numeros = [float(n) for n in re.findall(r"\d+\.\d+|\d+", texto)]
-                b = numeros[0] if len(numeros) > 0 else 3.0
-                y_val = numeros[1] if len(numeros) > 1 else 1.5
-                z = numeros[2] if len(numeros) > 2 else 1.0
-                
-                st.write("### 1. Datos extraídos:")
-                st.write(f"- Base (b): {b} m | Tirante (y): {y_val} m | Talud (z): {z}")
-                
-                st.write("### 2. Ecuaciones e Integrales Geométricas:")
-                st.latex(r"A = b \cdot y + z \cdot y^2 \quad \text{y} \quad P = b + 2y \sqrt{1 + z^2}")
-                
-                area_final = (b * y_val) + (z * (y_val ** 2))
-                raiz = np.sqrt(1 + z**2)
-                perimetro_final = b + (2 * y_val * raiz)
-                
-                st.write("### 3. Sustitución Paso a Paso:")
-                st.latex(rf"A = ({b})({y_val}) + ({z})({y_val})^2 = {area_final:.2f} \text{{ m}}^2")
-                st.latex(rf"P = {b} + 2({y_val})\sqrt{{1 + {z}^2}} = {perimetro_final:.2f} \text{{ m}}")
-                
-                st.success(f"Resultado: Área = **{area_final:.2f} m²** y Perímetro = **{perimetro_final:.2f} m**.")
-                
-                t = np.linspace(0, 10, 100)
-                y_graf = np.ones(100) * y_val
-                fig, ax = plt.subplots(figsize=(8, 3.5))
-                ax.plot(t, y_graf, color="#1D3557", linewidth=3)
-                ax.fill_between(t, 0, y_graf, color="#4EA8DE", alpha=0.4)
-                st.pyplot(fig)
-
-            # --- MOTOR 3: TANQUES ---
-            elif "tanque" in texto or "litros" in texto:
-                st.subheader("Resolución Analítica en Tiempo Real")
-                numeros = [float(n) for n in re.findall(r"\d+\.\d+|\d+", texto)]
-                v0 = numeros[0] if len(numeros) > 0 else 40.0
-                qe = numeros[1] if len(numeros) > 1 else 25.0
-                qs = numeros[2] if len(numeros) > 2 else 10.0
-                tiempo = numeros[3] if len(numeros) > 3 else 15.0
-                
-                st.write("### 1. Balance de Masa (EDO):")
-                st.latex(r"\frac{dV}{dt} = Q_e - Q_s")
-                
-                neto = qe - qs
-                v_final = v0 + (neto * tiempo)
-                
-                st.write("### 2. Integración Definida Paso a Paso:")
-                st.latex(rf"\int_{{{v0}}}^{{V}} dV = \int_{{0}}^{{{tiempo}}} {neto} \, dt \implies V({tiempo}) = {v_final:.2f}")
-                st.success(f"Volumen final calculado: **{v_final:.2f} Litros**.")
-                
-                t = np.linspace(0, tiempo * 1.3, 100)
-                fig, ax = plt.subplots(figsize=(8, 3.5))
-                ax.plot(t, v0 + neto * t, color="#E63946")
+                ax.legend()
                 st.pyplot(fig)
                 
-            else:
-                st.warning("Estructura matemática no reconocida por el motor local.")
+            except Exception as e:
+                st.error(f"Error al conectar con la IA: {e}. Verifica haber configurado correctamente tus Secrets.")
     else:
         st.warning("Por favor, introduzca un problema.")

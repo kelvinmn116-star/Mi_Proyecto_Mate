@@ -2,17 +2,13 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import google.generativeai as genai
-from google.api_core.client_options import ClientOptions
 
 st.set_page_config(page_title="MathModel AI", layout="centered")
 
-# 🔐 Conexión segura con la clave guardada en los Secrets de Streamlit
+# 🔐 Conexión limpia usando los Secrets que ya configuraste con éxito
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
-    
-    # Configuración obligatoria para las llaves 'AQ.' de Google
-    options = ClientOptions(api_endpoint="generativelanguage.googleapis.com")
-    genai.configure(api_key=API_KEY, client_options=options)
+    genai.configure(api_key=API_KEY)
 except Exception:
     st.error("Falta configurar la clave GEMINI_API_KEY en los Secrets de Streamlit Cloud.")
 
@@ -31,8 +27,8 @@ if st.button("Resolver con IA y Graficar"):
     if pregunta_usuario:
         with st.spinner("La Inteligencia Artificial está analizando y resolviendo el problema paso a paso..."):
             try:
-                # Modelo de última generación
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # Cambiado al modelo compatible estándar para resolver todo sin restricciones
+                model = genai.GenerativeModel('gemini-2.5-flash')
                 
                 prompt = f"""
                 Eres un profesor experto en matemáticas avanzadas, cálculo e ingeniería.
@@ -87,6 +83,6 @@ if st.button("Resolver con IA y Graficar"):
                 st.pyplot(fig)
                 
             except Exception as e:
-                st.error(f"Error al conectar con la IA: {e}. Verifica haber configurado correctamente tus Secrets.")
+                st.error(f"Error al conectar con la IA: {e}. Si el problema persiste, revisa el nombre del modelo.")
     else:
         st.warning("Por favor, introduzca un problema.")

@@ -6,10 +6,10 @@ from google.api_core.client_options import ClientOptions
 
 st.set_page_config(page_title="MathModel AI", layout="centered")
 
-# 🔑 Tu clave de Google configurada de forma correcta
+# 🔑 Tu clave guardada correctamente con las comillas obligatorias:
 API_KEY = "AQ.Ab8RN6IAD7WUcw_9FcYvaVv_DiNAihRQ4sA11CGn0goPxilyzA"
 
-# Forzar el endpoint correcto para evitar el error 401
+# Configuración especial para que Google acepte claves de cuentas de servicio
 options = ClientOptions(api_endpoint="generativelanguage.googleapis.com")
 genai.configure(api_key=API_KEY, client_options=options)
 
@@ -28,7 +28,7 @@ if st.button("Resolver y Graficar"):
     if pregunta_usuario:
         with st.spinner("La IA está analizando, extrayendo los datos numéricos y resolviendo el problema paso a paso..."):
             try:
-                # Usamos el modelo moderno que acepta tu tipo de clave
+                # Usar el modelo compatible con el endpoint configurado
                 model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt = f"""
